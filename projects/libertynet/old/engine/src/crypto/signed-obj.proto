@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+message SignedObj {
+  string owner = 1;
+  string pubKey = 2;
+  string signature = 3;
+  int32 version = 4;
+  google.protobuf.Any payload = 10;
+}

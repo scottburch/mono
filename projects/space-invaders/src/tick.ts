@@ -1,10 +1,10 @@
-import {eventListener, Msg, sendEvent, sendEventPartial} from "./msg-bus";
+import {eventListener, Msg, sendEvent, sendEventPartial} from "@scottburch/rxjs-msg-bus";
 import {debounceTime, filter, interval, map, Observable, scan, withLatestFrom} from "rxjs";
 import {RunningEvent} from "./running";
 import {TICK_START} from "./settings";
 import {GameOverEvent} from "./game-over";
 import {AlienDownEvent} from "./alien-mover";
-import {switchToLatestFrom} from "./utils";
+import {switchToLatestFrom} from "@scottburch/rxjs-utils";
 
 export type TickEvent = Msg<'tick', number>
 export type SpeedEvent = Msg<'speed', number>

@@ -1,4 +1,4 @@
-import {eventListener, Msg, sendEventPartial} from "./msg-bus";
+import {eventListener, Msg, sendEventPartial} from "@scottburch/rxjs-msg-bus";
 import {KeyEvent} from "./keyboard";
 import {filter, scan, tap} from "rxjs";
 

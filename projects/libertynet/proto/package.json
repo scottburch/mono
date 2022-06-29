@@ -1,0 +1,14 @@
+{
+  "name": "@libertynet/proto",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@scottburch/exec": "^1.1.1",
+    "@scottburch/rxjs-msg-bus": "^1.0.2",
+    "@types/node": "^18.0.5",
+    "ts-node": "^10.9.1",
+    "ts-proto": "^1.117.0",
+    "typescript": "^4.7.4"
+  }
+}

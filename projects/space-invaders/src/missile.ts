@@ -1,15 +1,15 @@
-import {eventListener, Msg, sendEventPartial} from "./msg-bus";
+import {eventListener, Msg, sendEventPartial} from "@scottburch/rxjs-msg-bus";
 import {filterKey, KeyEvent} from "./keyboard";
-import {filter, map, of, pipe, Subscription, tap, throttle} from "rxjs";
+import {filter, map, mergeMap, of, pipe, Subscription, tap, throttle} from "rxjs";
 import {TickEvent, whenMyTurn} from "./tick";
 import {FIRE_RATE, MISSLE_HEIGHT, MISSLE_WIDTH} from "./settings";
 import {getBarrelLocation, GunUpdatedEvent} from "./gun";
 import jq from "jquery";
 import {getContainer} from "./alien-render";
 import {RunningEvent} from "./running";
-import {switchToLatestFrom} from "./utils";
 import {uniqueId} from "lodash";
 import {Alien} from "./alien";
+import {switchToLatestFrom} from "@scottburch/rxjs-utils";
 
 export type Missile = {
     id: string,
@@ -41,7 +41,7 @@ const destroyMissile = pipe(
 
 const addTickListener = (missile: Missile) =>
     missile.tick = eventListener<TickEvent>('tick').pipe(
-        switchToLatestFrom(of(missile)),
+        mergeMap(() => of(missile)),
         tap(missile => missile.top -= 1),
         updateMissile,
         tap(sendEventPartial<MissileUpdatedEvent>('missile-updated'))

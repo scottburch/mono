@@ -1,5 +1,5 @@
 import {filter, fromEvent, pipe} from "rxjs";
-import {Msg, sendEvent} from "./msg-bus"
+import {Msg, sendEvent} from "@scottburch/rxjs-msg-bus"
 
 export type KeyData = {
     key: string,

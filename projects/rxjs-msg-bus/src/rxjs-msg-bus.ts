@@ -1,7 +1,7 @@
 import {filter, map, Observable, Subject} from "rxjs";
 
 
-export type Msg<TYPE, T> = {
+export type Msg<TYPE, T = {}> = {
     type: TYPE
     data: T
 }
@@ -14,5 +14,9 @@ export const eventListener = <T extends Msg<T['type'], T['data']>>(type: T['type
     map(msg => msg.data as T['data'])
 );
 
-export const sendEvent = <T extends Msg<T['type'], T['data']>>(type: T['type'], data: T['data']) => centralBus.next({type, data});
-export const sendEventPartial = <T extends Msg<T['type'], T['data']>>(type: T['type']) => (data: T['data']) => centralBus.next({type, data});
+export const sendEvent = <T extends Msg<T['type'], T['data']>>(type: T['type'], data: T['data'] = {}) =>
+    centralBus.next({type, data});
+export const sendEventPartial = <T extends Msg<T['type'], T['data']>>(type: T['type']) => (data: T['data']) =>
+    centralBus.next({type, data});
+
+export const getCentralMsgBus = () => centralBus$;

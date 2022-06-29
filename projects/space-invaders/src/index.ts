@@ -7,5 +7,6 @@ import './gun'
 import './titleBox'
 import "./game-over"
 import "./missile"
+import "./game"
 
 

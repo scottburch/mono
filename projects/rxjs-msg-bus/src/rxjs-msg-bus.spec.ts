@@ -1,4 +1,4 @@
-import {eventListener, Msg, sendEvent, sendEventPartial} from "../lib/rxjs-msg-bus";
+import {eventListener, Msg, sendEvent, sendEventPartial} from "./rxjs-msg-bus";
 import {scan} from "rxjs";
 
 describe('rxjs-msg-bus', () => {

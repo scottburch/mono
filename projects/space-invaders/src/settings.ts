@@ -1,6 +1,6 @@
 export const TICK_START = 5;
-export const ROWS = 4;
-export const COLS = 15;
+export const ROWS = 1;
+export const COLS = 5;
 export const GRID_SIZE_X = 40
 export const ALIEN_SPEED = 60;
 export const ALIEN_SIZE = 2;

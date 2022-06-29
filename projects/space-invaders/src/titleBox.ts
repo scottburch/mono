@@ -1,5 +1,5 @@
 import jq from "jquery";
-import {eventListener} from "./msg-bus";
+import {eventListener} from "@scottburch/rxjs-msg-bus";
 import {RunningEvent} from "./running";
 
 jq('#title')
