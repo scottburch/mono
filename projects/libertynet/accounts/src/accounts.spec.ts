@@ -10,7 +10,8 @@ import {rm} from "fs/promises";
 import * as path from 'path'
 
 
-describe('accounts', () => {
+describe('accounts', function() {
+    this.timeout(60_000);
     it('should check if an account exists and create it if it does not', (done) => {
         let swarm: Swarm;
         eventListener<AccountExistsMsg>('account-exists').pipe(
@@ -26,7 +27,7 @@ describe('accounts', () => {
         ).subscribe()
 
 
-        from(rm(path.join(__dirname, '../db-files'), {recursive: true})).pipe(
+        from(rm(path.join(__dirname, '../db-files'), {recursive: true, force: true})).pipe(
             switchMap(() => startSwarm().toPromise()),
             tap(swrm => swarm = swrm),
             tap(() => sendEvent<AppStartMsg>('app-start',{dbPath: './db-files'})),
