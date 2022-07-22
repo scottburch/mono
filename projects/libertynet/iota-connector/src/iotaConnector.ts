@@ -1,7 +1,18 @@
 import {IIndexationPayload, IMessage, INDEXATION_PAYLOAD_TYPE, ITypeBase, SingleNodeClient} from "@iota/iota.js";
 import {eventListener, sendEvent, sendEventPartial} from "@scottburch/rxjs-msg-bus";
 import {AppStartMsg, AppStopMsg} from "@libertynet/app/src/app";
-import {concatMap, filter, from, map, pipe, switchMap, tap, withLatestFrom, count,takeUntil, delay} from 'rxjs'
+import {
+    concatMap,
+    filter,
+    from,
+    map,
+    pipe,
+    switchMap,
+    tap,
+    withLatestFrom,
+    count,
+    takeUntil,
+} from 'rxjs'
 import {memoize} from "lodash";
 import {Converter} from "@iota/util.js";
 import {Buffer} from "buffer";
@@ -35,22 +46,21 @@ eventListener<CheckNewMilestoneMsg>('check-new-milestone').pipe(
     withLatestFrom(eventListener<ClientConnectedMsg>('client-connected')),
     switchMap(([index, client]) =>
         client.milestone(index)
-            .then(m => {
-                sendEvent<NewMilestoneDetectedMsg>('new-milestone-detected', m)
-            })
-            .catch(e => {
-                sendEvent<MilestoneDetectionErrorMsg>('milestone-detection-error', e.toString())
+            .then(m => sendEvent<NewMilestoneDetectedMsg>('new-milestone-detected', m))
+            .catch(err => {
+                sendEvent<MilestoneDetectionErrorMsg>('milestone-detection-error', err.toString());
+                setTimeout(() => sendEvent<CheckNewMilestoneMsg>('check-new-milestone', index), 2000)
             })
     ),
-    delay(2000),
-    switchToLatestFrom(eventListener<CheckNewMilestoneMsg>('check-new-milestone')),
-    tap(index => sendEvent<CheckNewMilestoneMsg>('check-new-milestone', index))
 ).subscribe()
 
 // detect new milestone connected messages
 eventListener<NewMilestoneDetectedMsg>('new-milestone-detected').pipe(
     withLatestFrom(eventListener<ClientConnectedMsg>('client-connected')),
-    concatMap(([milestone, client]) => client.message(milestone.messageId).then(ms => ({index: milestone.index, milestone: ms}))),
+    concatMap(([milestone, client]) => client.message(milestone.messageId).then(ms => ({
+        index: milestone.index,
+        milestone: ms
+    }))),
     concatMap(({index, milestone}) => from(milestone.parentMessageIds as string[]).pipe(
         filterOutGenesisParent(),
         filterOutPreviousMessageIds(),
@@ -107,6 +117,7 @@ eventListener<SendLibertynetMessageAction>('send-libertynet-message').pipe(
 export const newIotaClient = (url: string = 'http://localhost:14265') => new SingleNodeClient(url);
 
 const previousMessageIds: Record<string, { timestamp: number }> = {}
+
 function filterOutPreviousMessageIds() {
     return pipe(
         filter((id: string) => !previousMessageIds[id]),
