@@ -9,6 +9,7 @@ import {
     NewMilestoneDetectedMsg,
     SendLibertynetMessageAction
 } from "./messages";
+import '@libertynet/test/src/test-app'
 
 describe('iota-connector', () => {
     it('should send a milestone detection error if a swarm is not up yet', () => {

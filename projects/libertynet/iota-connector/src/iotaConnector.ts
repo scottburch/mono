@@ -1,7 +1,7 @@
 import {IIndexationPayload, IMessage, INDEXATION_PAYLOAD_TYPE, ITypeBase, SingleNodeClient} from "@iota/iota.js";
 import {eventListener, sendEvent, sendEventPartial} from "@scottburch/rxjs-msg-bus";
 import {AppStartMsg, AppStopMsg} from "@libertynet/app/src/app";
-import {concatMap, filter, from, interval, map, pipe, switchMap, takeUntil, tap, withLatestFrom} from 'rxjs'
+import {concatMap, filter, from, interval, map, pipe, switchMap, takeUntil, tap, withLatestFrom, count, mergeMap, iif, of} from 'rxjs'
 import {switchToLatestFrom} from '@scottburch/rxjs-utils'
 import {memoize} from "lodash";
 import {Converter} from "@iota/util.js";
@@ -45,8 +45,6 @@ eventListener<IotaPollTickMsg>('iota-poll-tick').pipe(
         client.milestone(index + 1)
             .then(m => {
                 sendEvent<NewMilestoneDetectedMsg>('new-milestone-detected', m);
-                sendEvent<LastMilestoneDetectedMsg>('last-milestone-detected', index + 1);
-                sendEvent<IotaPollTickMsg>('iota-poll-tick');
             })
             .catch(e => sendEvent<MilestoneDetectionErrorMsg>('milestone-detection-error', e.toString()))
     ),
@@ -55,11 +53,16 @@ eventListener<IotaPollTickMsg>('iota-poll-tick').pipe(
 // detect new milestone connected messages
 eventListener<NewMilestoneDetectedMsg>('new-milestone-detected').pipe(
     withLatestFrom(eventListener<ClientConnectedMsg>('client-connected')),
-    concatMap(([milestone, client]) => client.message(milestone.messageId)),
-    concatMap(milestone => from(milestone.parentMessageIds as string[])),
-    filterOutGenesisParent(),
-    filterOutPreviousMessageIds(),
-    tap(sendEventPartial<NewIotaMessageIdMsg>('new-iota-message-id'))
+    concatMap(([milestone, client]) => client.message(milestone.messageId).then(ms => ({index: milestone.index, milestone: ms}))),
+    mergeMap(({index, milestone}) => from(milestone.parentMessageIds as string[]).pipe(
+        filterOutGenesisParent(),
+        filterOutPreviousMessageIds(),
+        tap(sendEventPartial<NewIotaMessageIdMsg>('new-iota-message-id')),
+        count()
+    )),
+    withLatestFrom(eventListener<LastMilestoneDetectedMsg>('last-milestone-detected')),
+    tap(([_, index]) => sendEvent<LastMilestoneDetectedMsg>('last-milestone-detected', index + 1)),
+    tap(() => sendEvent<IotaPollTickMsg>('iota-poll-tick'))
 ).subscribe();
 
 // read back in the graph to find new messages
