@@ -3,8 +3,7 @@ import {IMessage, IMilestoneResponse, SingleNodeClient} from "@iota/iota.js";
 
 type Hex = string;
 export type ClientConnectedMsg = Msg<'client-connected', SingleNodeClient>
-export type IotaPollTickMsg = Msg<'iota-poll-tick'>
-export type LastMilestoneDetectedMsg = Msg<'last-milestone-detected', number>
+export type CheckNewMilestoneMsg = Msg<'check-new-milestone', number>
 export type NewMilestoneDetectedMsg = Msg<'new-milestone-detected', IMilestoneResponse>
 export type MilestoneDetectionErrorMsg = Msg<'milestone-detection-error', unknown>
 export type NewLibertynetMessageMsg = Msg<'new-libertynet-message', Hex>

@@ -1,15 +1,13 @@
 import {IIndexationPayload, IMessage, INDEXATION_PAYLOAD_TYPE, ITypeBase, SingleNodeClient} from "@iota/iota.js";
 import {eventListener, sendEvent, sendEventPartial} from "@scottburch/rxjs-msg-bus";
 import {AppStartMsg, AppStopMsg} from "@libertynet/app/src/app";
-import {concatMap, filter, from, interval, map, pipe, switchMap, takeUntil, tap, withLatestFrom, count, mergeMap} from 'rxjs'
-import {switchToLatestFrom} from '@scottburch/rxjs-utils'
+import {concatMap, filter, from, map, pipe, switchMap, tap, withLatestFrom, count,takeUntil, delay} from 'rxjs'
 import {memoize} from "lodash";
 import {Converter} from "@iota/util.js";
 import {Buffer} from "buffer";
 import {
     ClientConnectedMsg,
-    IotaPollTickMsg,
-    LastMilestoneDetectedMsg,
+    CheckNewMilestoneMsg,
     MilestoneDetectionErrorMsg,
     NewIotaMessageIdMsg,
     NewLibertynetMessageMsg,
@@ -17,18 +15,12 @@ import {
     SendIotaMessageAction,
     SendLibertynetMessageAction
 } from "./messages";
+import {switchToLatestFrom} from "@scottburch/rxjs-utils";
 
-
-// set milestone counter
-eventListener<AppStartMsg>('app-start').pipe(
-    tap(() => sendEvent<LastMilestoneDetectedMsg>('last-milestone-detected', 0))
-).subscribe()
 
 // start poll ticker
-eventListener<AppStartMsg>('app-start').pipe(
-    switchMap(() => interval(2000)),
-    takeUntil(eventListener<AppStopMsg>('app-stop')),
-    tap(sendEventPartial<IotaPollTickMsg>('iota-poll-tick'))
+eventListener<ClientConnectedMsg>('client-connected').pipe(
+    tap(() => setTimeout(() => sendEvent<CheckNewMilestoneMsg>('check-new-milestone', 1)))
 ).subscribe();
 
 // connect iota client
@@ -38,16 +30,21 @@ eventListener<AppStartMsg>('app-start').pipe(
 ).subscribe()
 
 // detect new milestones
-eventListener<IotaPollTickMsg>('iota-poll-tick').pipe(
-    switchToLatestFrom(eventListener<ClientConnectedMsg>('client-connected')),
-    withLatestFrom(eventListener<LastMilestoneDetectedMsg>('last-milestone-detected')),
-    switchMap(([client, index]) =>
-        client.milestone(index + 1)
+eventListener<CheckNewMilestoneMsg>('check-new-milestone').pipe(
+    takeUntil(eventListener<AppStopMsg>('app-stop')),
+    withLatestFrom(eventListener<ClientConnectedMsg>('client-connected')),
+    switchMap(([index, client]) =>
+        client.milestone(index)
             .then(m => {
-                sendEvent<NewMilestoneDetectedMsg>('new-milestone-detected', m);
+                sendEvent<NewMilestoneDetectedMsg>('new-milestone-detected', m)
             })
-            .catch(e => sendEvent<MilestoneDetectionErrorMsg>('milestone-detection-error', e.toString()))
+            .catch(e => {
+                sendEvent<MilestoneDetectionErrorMsg>('milestone-detection-error', e.toString())
+            })
     ),
+    delay(2000),
+    switchToLatestFrom(eventListener<CheckNewMilestoneMsg>('check-new-milestone')),
+    tap(index => sendEvent<CheckNewMilestoneMsg>('check-new-milestone', index))
 ).subscribe()
 
 // detect new milestone connected messages
@@ -60,9 +57,8 @@ eventListener<NewMilestoneDetectedMsg>('new-milestone-detected').pipe(
         tap(sendEventPartial<NewIotaMessageIdMsg>('new-iota-message-id')),
         count()
     )),
-    withLatestFrom(eventListener<LastMilestoneDetectedMsg>('last-milestone-detected')),
-    tap(([_, index]) => sendEvent<LastMilestoneDetectedMsg>('last-milestone-detected', index + 1)),
-    tap(() => sendEvent<IotaPollTickMsg>('iota-poll-tick'))
+    switchToLatestFrom(eventListener<CheckNewMilestoneMsg>('check-new-milestone')),
+    tap(index => sendEvent<CheckNewMilestoneMsg>('check-new-milestone', index + 1))
 ).subscribe();
 
 // read back in the graph to find new messages

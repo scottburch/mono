@@ -15,7 +15,7 @@ eventListener<EnableLogCentralBusMsg>('enable-log-central-bus').pipe(
     switchMap(() => getCentralMsgBus()),
     takeUntil(eventListener<DisableLogCentralBusMsg>('disable-log-central-bus')),
     takeUntil(eventListener<AppStopMsg>('app-stop')),
-    tap(console.log)
+    tap(entry => console.log(new Date().toISOString(), entry))
 ).subscribe()
 
 
