@@ -53,5 +53,5 @@ describe('iota-connector', () => {
                 )
             ))
         ))
-    })
+    });
 });
