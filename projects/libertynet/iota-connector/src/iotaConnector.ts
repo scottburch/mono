@@ -1,7 +1,7 @@
 import {IIndexationPayload, IMessage, INDEXATION_PAYLOAD_TYPE, ITypeBase, SingleNodeClient} from "@iota/iota.js";
 import {eventListener, sendEvent, sendEventPartial} from "@scottburch/rxjs-msg-bus";
 import {AppStartMsg, AppStopMsg} from "@libertynet/app/src/app";
-import {concatMap, filter, from, interval, map, pipe, switchMap, takeUntil, tap, withLatestFrom, count, mergeMap, iif, of} from 'rxjs'
+import {concatMap, filter, from, interval, map, pipe, switchMap, takeUntil, tap, withLatestFrom, count, mergeMap} from 'rxjs'
 import {switchToLatestFrom} from '@scottburch/rxjs-utils'
 import {memoize} from "lodash";
 import {Converter} from "@iota/util.js";
@@ -54,7 +54,7 @@ eventListener<IotaPollTickMsg>('iota-poll-tick').pipe(
 eventListener<NewMilestoneDetectedMsg>('new-milestone-detected').pipe(
     withLatestFrom(eventListener<ClientConnectedMsg>('client-connected')),
     concatMap(([milestone, client]) => client.message(milestone.messageId).then(ms => ({index: milestone.index, milestone: ms}))),
-    mergeMap(({index, milestone}) => from(milestone.parentMessageIds as string[]).pipe(
+    concatMap(({index, milestone}) => from(milestone.parentMessageIds as string[]).pipe(
         filterOutGenesisParent(),
         filterOutPreviousMessageIds(),
         tap(sendEventPartial<NewIotaMessageIdMsg>('new-iota-message-id')),
