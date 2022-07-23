@@ -1,5 +1,5 @@
 import {eventListener, Msg, sendEvent} from "@scottburch/rxjs-msg-bus";
-import {DbReadAction, DbWriteAction, ValueReadFromDbMsg} from "@libertynet/db/src/db";
+import {buildKey, DbReadAction, DbWriteAction, ValueReadFromDbMsg} from "@libertynet/db/src/db";
 import {first, tap, filter, map, takeUntil} from 'rxjs'
 import {Account} from "./account";
 import {AppStopMsg} from '@libertynet/app/src/app'
@@ -18,7 +18,7 @@ export type AccountExistsMsg = Msg<'account-exists', {
 eventListener<EnsureAccountExistsAction>('ensure-account-exists').pipe(
     takeUntil(eventListener<AppStopMsg>('app-stop')),
     tap(({address, pubKey}) => eventListener<ValueReadFromDbMsg>('value-read-from-db').pipe(
-        filter(({key}) => new TextDecoder().decode(key) === `account-${address}`),
+        filter(({key}) => key.toString() === buildKey('libertynet', 'account', address).toString()),
         first(),
         tap(({key, value}) => value.length > 0 || sendEvent<DbWriteAction>('write-to-db', {
             key,
@@ -29,6 +29,6 @@ eventListener<EnsureAccountExistsAction>('ensure-account-exists').pipe(
     ).subscribe()),
 
     tap(({address}) => sendEvent<DbReadAction>('read-from-db', {
-        key: new TextEncoder().encode(`account-${address}`)
+        key: buildKey('libertynet', 'account', address)
     }))
 ).subscribe()

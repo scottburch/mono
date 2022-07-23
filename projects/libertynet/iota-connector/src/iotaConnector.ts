@@ -13,7 +13,7 @@ import {
     count,
     takeUntil,
 } from 'rxjs'
-import {memoize} from "lodash";
+import {memoize, partial} from "lodash";
 import {Converter} from "@iota/util.js";
 import {Buffer} from "buffer";
 import {
@@ -27,18 +27,36 @@ import {
     SendLibertynetMessageAction
 } from "./messages";
 import {switchToLatestFrom} from "@scottburch/rxjs-utils";
+import {buildKey, bytesToNum, numToBytes, readFromDb, writeToDb} from "@libertynet/db/src/db";
 
+
+const getLastMilestoneReadKey = memoize(() => buildKey('libertynet', 'iota', 'last-milestone-read'));
 
 // start poll ticker
 eventListener<ClientConnectedMsg>('client-connected').pipe(
-    tap(() => setTimeout(() => sendEvent<CheckNewMilestoneMsg>('check-new-milestone', 1)))
+    map(() => ({key: getLastMilestoneReadKey()})),
+    readFromDb(),
+    map(bytesToNum),
+    map(partial(Math.max, 1)),
+    tap(startMilestone => setTimeout(() => sendEvent<CheckNewMilestoneMsg>('check-new-milestone', startMilestone)))
 ).subscribe();
+
+eventListener<CheckNewMilestoneMsg>('check-new-milestone').pipe(
+    map(index => ({
+        key: getLastMilestoneReadKey(),
+        value: numToBytes(index)
+    })),
+    writeToDb()
+).subscribe();
+
 
 // connect iota client
 eventListener<AppStartMsg>('app-start').pipe(
     map(() => newIotaClient()),
     tap(sendEventPartial<ClientConnectedMsg>('client-connected'))
 ).subscribe()
+
+
 
 // detect new milestones
 eventListener<CheckNewMilestoneMsg>('check-new-milestone').pipe(
