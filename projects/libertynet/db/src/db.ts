@@ -1,5 +1,5 @@
 import {eventListener, Msg, sendEvent, sendEventPartial} from "@scottburch/rxjs-msg-bus";
-import {AppStartMsg} from '@libertynet/app/src/app'
+import {AppStartMsg} from '@libertynet/app'
 import {Level} from "level";
 import {map, switchMap, tap, withLatestFrom, concatMap, pipe, filter, first} from 'rxjs'
 

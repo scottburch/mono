@@ -1,7 +1,6 @@
 import {eventListener, Msg, sendEvent} from "@scottburch/rxjs-msg-bus";
-import {switchMap, filter, from, tap, map} from 'rxjs'
-import {NewValidSignedObjMsg} from "@libertynet/crypto/src/crypto";
-import {SignedObj} from "@libertynet/crypto/src/signedObj";
+import {filter, from, map, switchMap, tap} from 'rxjs'
+import {NewValidSignedObjMsg, SignedObj} from "@libertynet/crypto";
 
 export type RegisterNewRouteHandler = Msg<'register-new-route', {
     typeUrl: string,

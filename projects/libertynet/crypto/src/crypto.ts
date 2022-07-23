@@ -4,9 +4,9 @@ import * as ed from '@noble/ed25519';
 import {pad} from "lodash";
 import {bech32} from 'bech32'
 import {SignedObj} from "./signedObj";
-import {AppStopMsg} from '@libertynet/app/src/app'
-import {NewLibertynetMessageMsg, SendLibertynetMessageAction} from '@libertynet/iota-connector/src/messages'
-import {AccountExistsMsg, EnsureAccountExistsAction} from "@libertynet/accounts/src/accounts";
+import {AppStopMsg} from '@libertynet/app'
+import {NewLibertynetMessageMsg, SendLibertynetMessageAction} from '@libertynet/iota-connector'
+import {AccountExistsMsg, EnsureAccountExistsAction} from "@libertynet/accounts";
 
 export type SendSignedObjMessageAction = Msg<'send-signed-obj-message', {
     username: string

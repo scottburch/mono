@@ -1,6 +1,6 @@
 import {IIndexationPayload, IMessage, INDEXATION_PAYLOAD_TYPE, ITypeBase, SingleNodeClient} from "@iota/iota.js";
 import {eventListener, sendEvent, sendEventPartial} from "@scottburch/rxjs-msg-bus";
-import {AppStartMsg, AppStopMsg} from "@libertynet/app/src/app";
+import {AppStartMsg, AppStopMsg} from "@libertynet/app";
 import {
     concatMap,
     filter,
@@ -27,7 +27,7 @@ import {
     SendLibertynetMessageAction
 } from "./messages";
 import {switchToLatestFrom} from "@scottburch/rxjs-utils";
-import {buildKey, bytesToNum, numToBytes, readFromDb, writeToDb} from "@libertynet/db/src/db";
+import {buildKey, bytesToNum, numToBytes, readFromDb, writeToDb} from "@libertynet/db";
 
 
 const getLastMilestoneReadKey = memoize(() => buildKey('libertynet', 'iota', 'last-milestone-read'));

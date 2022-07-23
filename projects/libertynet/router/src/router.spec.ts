@@ -1,5 +1,5 @@
 import {eventListener, Msg, sendEvent} from "@scottburch/rxjs-msg-bus";
-import {NewValidSignedObjMsg} from '@libertynet/crypto/src/crypto'
+import {NewValidSignedObjMsg} from '@libertynet/crypto'
 import {RegisterNewRouteHandler, RouteHandlerObj} from "./router";
 import {first, tap} from 'rxjs'
 import {expect} from 'chai'

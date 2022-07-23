@@ -7,17 +7,21 @@ import {
     verifySig,
     verifySignedObj
 } from "./crypto";
-import './crypto'
 import {map, of, switchMap, tap, withLatestFrom, from, first, filter} from "rxjs";
 import {expect} from "chai";
 import {eventListener, sendEvent} from "@scottburch/rxjs-msg-bus";
 import {startSwarm, stopSwarm, Swarm} from '@libertynet/test/src/swarm-utils'
-import {AppStartMsg} from '@libertynet/app/src/app'
-import '@libertynet/iota-connector/src/iotaConnector'
-import '@libertynet/accounts/src/accounts'
+import {AppStartMsg, AppStopMsg, DisableLogCentralBusMsg, EnableLogCentralBusMsg} from '@libertynet/app'
+import '@libertynet/iota-connector'
+import '@libertynet/accounts'
+import './crypto'
+
 
 
 describe('crypto', () => {
+    beforeEach(() => sendEvent<EnableLogCentralBusMsg>('enable-log-central-bus'));
+    afterEach(() => sendEvent<DisableLogCentralBusMsg>('disable-log-central-bus'));
+
     it('should create a signed object from a username and password', (done) => {
         of({
             username: 'my-name',
@@ -118,6 +122,7 @@ describe('crypto', () => {
         eventListener<NewValidSignedObjMsg>('new-valid-signed-obj').pipe(
             filter(signedObj => signedObj.payload[0].data?.typeUrl === 'my-type'),
             first(),
+            tap(() => sendEvent<AppStopMsg>('app-stop')),
             switchMap(() => stopSwarm(swarm)),
             tap(() => done())
         ).subscribe();

@@ -1,8 +1,8 @@
 import {eventListener, Msg, sendEventPartial} from "@scottburch/rxjs-msg-bus";
-import {buildKey, readFromDb, writeToDb} from "@libertynet/db/src/db";
+import {buildKey, readFromDb, writeToDb} from "@libertynet/db";
 import {map, of, switchMap, takeUntil, tap, iif} from 'rxjs'
 import {Account} from "./account";
-import {AppStopMsg} from '@libertynet/app/src/app'
+import {AppStopMsg} from '@libertynet/app'
 
 type Hex = string;
 export type EnsureAccountExistsAction = Msg<'ensure-account-exists', {

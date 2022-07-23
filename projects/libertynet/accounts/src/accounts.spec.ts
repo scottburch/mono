@@ -1,9 +1,7 @@
 import {eventListener, sendEvent} from "@scottburch/rxjs-msg-bus";
 import {AccountExistsMsg, EnsureAccountExistsAction} from "./accounts";
 import {from, tap, filter, take, bufferCount, delay} from 'rxjs'
-import './accounts'
-import {AppStartMsg} from '@libertynet/app/src/app'
-import '@libertynet/app/src/app'
+import {AppStartMsg} from '@libertynet/app'
 import {expect} from "chai";
 import {rm} from "fs/promises";
 import * as path from 'path'

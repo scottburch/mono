@@ -1,6 +1,6 @@
 import {startSwarm, stopHornet, stopSwarm, Swarm} from "@libertynet/test/src/swarm-utils";
-import {AppStartMsg, AppStopMsg} from "@libertynet/app/src/app";
-import {concatMap, filter, firstValueFrom, from, map, skip, switchMap, tap, timer, first, of, catchError} from 'rxjs'
+import {AppStartMsg, AppStopMsg} from "@libertynet/app";
+import {concatMap, filter, first, firstValueFrom, from, map, skip, switchMap, tap, timer, delay} from 'rxjs'
 import {eventListener, sendEvent} from "@scottburch/rxjs-msg-bus";
 import './iotaConnector'
 import {

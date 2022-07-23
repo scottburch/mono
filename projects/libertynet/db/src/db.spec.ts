@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra'
-import {AppStartMsg} from '@libertynet/app/src/app'
+import {AppStartMsg} from '@libertynet/app'
 import {from, map, tap} from 'rxjs'
 import {sendEvent} from "@scottburch/rxjs-msg-bus";
 import {buildKey, bytesToNum, numToBytes, readFromDb, writeToDb} from "./db";
