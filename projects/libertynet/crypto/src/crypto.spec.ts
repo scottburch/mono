@@ -48,7 +48,7 @@ describe('crypto', () => {
             decodeSignedObj(),
             map(signedObj => ({signedObj, pubKey: signedObj.pubKey})),
             verifySignedObj(),
-            tap(result => expect(result).to.be.true)
+            tap(result => expect(result.isValid).to.be.true)
 
         ).subscribe(() => done());
     });
@@ -65,7 +65,7 @@ describe('crypto', () => {
             map(signedObj => ({...signedObj, payload: [{...signedObj.payload[0], data: {typeUrl: '', value: new TextEncoder().encode('ay-data')}}]})),
             map(signedObj => ({signedObj, pubKey: signedObj.pubKey})),
             verifySignedObj(),
-            tap(result => expect(result).to.be.false)
+            tap(result => expect(result.isValid).to.be.false)
 
         ).subscribe(() => done());
     });
@@ -83,7 +83,7 @@ describe('crypto', () => {
             map(signedObj => ({...signedObj, pubKey: signedObj.pubKey.replace('9', 'a')})),
             map(signedObj => ({signedObj, pubKey: signedObj.pubKey})),
             verifySignedObj(),
-            tap(result => expect(result).to.be.false)
+            tap(result => expect(result.isValid).to.be.false)
 
         ).subscribe(() => done());
     });

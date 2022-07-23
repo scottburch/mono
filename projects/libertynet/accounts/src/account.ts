@@ -4,11 +4,12 @@ import * as _m0 from "protobufjs/minimal";
 export const protobufPackage = "";
 
 export interface Account {
+  address: string;
   pubKey: string;
 }
 
 function createBaseAccount(): Account {
-  return { pubKey: "" };
+  return { address: "", pubKey: "" };
 }
 
 export const Account = {
@@ -16,8 +17,11 @@ export const Account = {
     message: Account,
     writer: _m0.Writer = _m0.Writer.create()
   ): _m0.Writer {
+    if (message.address !== "") {
+      writer.uint32(10).string(message.address);
+    }
     if (message.pubKey !== "") {
-      writer.uint32(10).string(message.pubKey);
+      writer.uint32(18).string(message.pubKey);
     }
     return writer;
   },
@@ -30,6 +34,9 @@ export const Account = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          message.address = reader.string();
+          break;
+        case 2:
           message.pubKey = reader.string();
           break;
         default:
@@ -42,18 +49,21 @@ export const Account = {
 
   fromJSON(object: any): Account {
     return {
+      address: isSet(object.address) ? String(object.address) : "",
       pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
     };
   },
 
   toJSON(message: Account): unknown {
     const obj: any = {};
+    message.address !== undefined && (obj.address = message.address);
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<Account>, I>>(object: I): Account {
     const message = createBaseAccount();
+    message.address = object.address ?? "";
     message.pubKey = object.pubKey ?? "";
     return message;
   },

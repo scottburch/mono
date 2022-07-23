@@ -17,8 +17,10 @@ describe('accounts', function() {
             take(2),
             bufferCount(2),
             tap(accounts => {
-                expect(accounts[0].account.pubKey).to.equal('my-pubkey');
-                expect(accounts[1].account.pubKey).to.equal('my-pubkey');
+                expect(accounts[0].address).to.equal('my-address')
+                expect(accounts[0].pubKey).to.equal('my-pubkey');
+                expect(accounts[0].address).to.equal('my-address')
+                expect(accounts[1].pubKey).to.equal('my-pubkey');
             }),
             tap(() => done())
         ).subscribe()

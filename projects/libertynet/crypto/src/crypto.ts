@@ -121,7 +121,7 @@ eventListener<NewSignedObjMsg>('new-signed-obj').pipe(
     switchMap((signedObj) => eventListener<AccountExistsMsg>('account-exists').pipe(
         filter(({address}) => address === signedObj.owner),
         first(),
-        map(({account}) => ({signedObj, account}))
+        map((account) => ({signedObj, account}))
     )),
     first(),
     map(({signedObj, account}) => ({signedObj, pubKey: account.pubKey})),

@@ -1,6 +1,6 @@
-import {eventListener, Msg, sendEvent} from "@scottburch/rxjs-msg-bus";
-import {buildKey, DbWriteAction, readFromDb} from "@libertynet/db/src/db";
-import {map, of, switchMap, takeUntil, tap} from 'rxjs'
+import {eventListener, Msg, sendEventPartial} from "@scottburch/rxjs-msg-bus";
+import {buildKey, readFromDb, writeToDb} from "@libertynet/db/src/db";
+import {map, of, switchMap, takeUntil, tap, iif} from 'rxjs'
 import {Account} from "./account";
 import {AppStopMsg} from '@libertynet/app/src/app'
 
@@ -10,10 +10,7 @@ export type EnsureAccountExistsAction = Msg<'ensure-account-exists', {
     pubKey: Hex
 }>;
 
-export type AccountExistsMsg = Msg<'account-exists', {
-    address: Hex,
-    account: Account
-}>
+export type AccountExistsMsg = Msg<'account-exists', Account>
 
 eventListener<EnsureAccountExistsAction>('ensure-account-exists').pipe(
     takeUntil(eventListener<AppStopMsg>('app-stop')),
@@ -23,11 +20,19 @@ eventListener<EnsureAccountExistsAction>('ensure-account-exists').pipe(
             key: buildKey('libertynet', 'account', address)
         })),
         readFromDb(),
-        tap(value => value.length > 0 || sendEvent<DbWriteAction>('write-to-db', {
-            key: buildKey('libertynet', 'account', address),
-            value: Account.encode({pubKey}).finish()
-        })),
-        map((value) => value.length > 0 ? Account.decode(value) :  Account.fromJSON({pubKey: pubKey} as Account)),
-        tap((account) => sendEvent<AccountExistsMsg>('account-exists', {address, account}))
+
+        switchMap(value => iif(() => value.length > 0, (
+            of(Account.decode(value))
+        ), (
+            of({
+                key: buildKey('libertynet', 'account', address),
+                value: Account.encode({pubKey, address}).finish()
+            }).pipe(
+                writeToDb(),
+                map(() => Account.fromJSON({pubKey, address}))
+            )
+        ))),
+
+        tap(sendEventPartial<AccountExistsMsg>('account-exists'))
     ))
 ).subscribe()
