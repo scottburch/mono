@@ -1,7 +1,6 @@
 import {eventListener, sendEvent} from "@scottburch/rxjs-msg-bus";
 import {AccountExistsMsg, EnsureAccountExistsAction} from "./accounts";
-import {from, tap, filter, take, bufferCount, switchMap, delay} from 'rxjs'
-import {startSwarm, Swarm ,stopSwarm} from '@libertynet/test/src/swarm-utils'
+import {from, tap, filter, take, bufferCount, delay} from 'rxjs'
 import './accounts'
 import {AppStartMsg} from '@libertynet/app/src/app'
 import '@libertynet/app/src/app'
@@ -13,7 +12,6 @@ import * as path from 'path'
 describe('accounts', function() {
     this.timeout(60_000);
     it('should check if an account exists and create it if it does not', (done) => {
-        let swarm: Swarm;
         eventListener<AccountExistsMsg>('account-exists').pipe(
             filter(({address}) => address === 'my-address'),
             take(2),
@@ -22,14 +20,11 @@ describe('accounts', function() {
                 expect(accounts[0].account.pubKey).to.equal('my-pubkey');
                 expect(accounts[1].account.pubKey).to.equal('my-pubkey');
             }),
-            tap(() => stopSwarm(swarm)),
             tap(() => done())
         ).subscribe()
 
 
         from(rm(path.join(__dirname, '../db-files'), {recursive: true, force: true})).pipe(
-            switchMap(() => startSwarm().toPromise()),
-            tap(swrm => swarm = swrm),
             tap(() => sendEvent<AppStartMsg>('app-start',{dbPath: './db-files'})),
             tap(() =>  sendEvent<EnsureAccountExistsAction>('ensure-account-exists', {
                 address: 'my-address',
