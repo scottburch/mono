@@ -3,6 +3,7 @@ import {takeUntil, switchMap, tap} from 'rxjs'
 
 export type AppConfig = {
     dbPath: string
+    nodeUrl?: string
 }
 
 export type EnableLogCentralBusMsg = Msg<'enable-log-central-bus'>

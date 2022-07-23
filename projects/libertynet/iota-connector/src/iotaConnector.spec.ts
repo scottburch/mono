@@ -1,9 +1,10 @@
 import {startSwarm, stopHornet, stopSwarm, Swarm} from "@libertynet/test/src/swarm-utils";
 import {AppStartMsg, AppStopMsg} from "@libertynet/app/src/app";
-import {concatMap, filter, firstValueFrom, from, map, skip, switchMap, tap, timer, first} from 'rxjs'
+import {concatMap, filter, firstValueFrom, from, map, skip, switchMap, tap, timer, first, of, catchError} from 'rxjs'
 import {eventListener, sendEvent} from "@scottburch/rxjs-msg-bus";
 import './iotaConnector'
 import {
+    ClientConnectedMsg,
     MilestoneDetectionErrorMsg,
     NewLibertynetMessageMsg,
     NewMilestoneDetectedMsg,
@@ -11,11 +12,26 @@ import {
 } from "./messages";
 import '@libertynet/test/src/test-app'
 import {rm} from "fs/promises";
+import {expect} from 'chai'
 
 describe('iota-connector', () => {
     beforeEach(() =>
         rm(__dirname + '/../db-files', {recursive: true, force: true})
     );
+
+    it('should pick up the nodeUrl from the app-start to connect to', (done) => {
+        eventListener<ClientConnectedMsg>('client-connected').pipe(
+            first(),
+            tap(client => expect((client as any)._endpoint).to.equal('http://localhost:2222')),
+            tap(() => sendEvent<AppStopMsg>('app-stop')),
+            tap(() => done())
+        ).subscribe();
+
+        sendEvent<AppStartMsg>('app-start', {
+            dbPath: __dirname + '/../db-files',
+            nodeUrl: 'http://localhost:2222'
+        })
+    });
 
     it('should send a milestone detection error if a swarm is not up yet', () => {
         return firstValueFrom(timer(0).pipe(

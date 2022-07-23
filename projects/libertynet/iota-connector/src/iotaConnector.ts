@@ -52,7 +52,7 @@ eventListener<CheckNewMilestoneMsg>('check-new-milestone').pipe(
 
 // connect iota client
 eventListener<AppStartMsg>('app-start').pipe(
-    map(() => newIotaClient()),
+    map(({nodeUrl}) => newIotaClient(nodeUrl)),
     tap(sendEventPartial<ClientConnectedMsg>('client-connected'))
 ).subscribe()
 
